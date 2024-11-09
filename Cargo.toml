@@ -1,6 +1,6 @@
 [package]
 name          = "weekdays"
-version       = "0.0.1"
+version       = "0.1.0"
 description   = "Days of the week bit-mapped in a single byte"
 categories    = ["data-structures", "database", "date-and-time", "encoding"]
 keywords      = ["date", "integer", "library", "utility", "weekday"]

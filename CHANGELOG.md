@@ -9,3 +9,12 @@ The format is based on [Keep a Changelog][], and this project adheres to
 [Semantic Versioning][].
 
 
+## 0.1.0 (09 November 2024)
+
+### Added
+
+  - Added `Weekdays` type with full set of functionality
+  - Added unit tests
+  - Added README documentation
+
+
