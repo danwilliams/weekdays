@@ -3,7 +3,17 @@
 //		Packages
 
 use super::*;
-use claims::{assert_err, assert_ok_eq};
+#[cfg(feature = "postgres")]
+use claims::assert_err;
+#[cfg(feature = "serde")]
+use claims::assert_ok_eq;
+
+/// List of crates used in feature-based tests.
+#[cfg(test)]
+mod feature_based_tests {
+	use claims as _;
+	use serde_json as _;
+}
 
 
 
@@ -104,6 +114,7 @@ mod public_methods {
 	}
 	
 	//		to_chrono_vec														
+	#[cfg(feature = "chrono")]
 	#[test]
 	fn to_chrono_vec() {
 		assert_eq!(Weekdays::new(0b00000_00).to_chrono_vec(), vec![]);
@@ -313,6 +324,7 @@ mod traits {
 	}
 	
 	//		Deserialize															
+	#[cfg(feature = "serde")]
 	#[test]
 	fn deserialize() {
 		assert_ok_eq!(serde_json::from_str::<Weekdays>(  "0"), Weekdays::new(0b00000_00));
@@ -354,6 +366,7 @@ mod traits {
 	}
 	
 	//		Serialize															
+	#[cfg(feature = "serde")]
 	#[test]
 	fn serialize() {
 		assert_eq!(serde_json::to_string(&Weekdays::new(0b00000_00)).unwrap(),   "0");
@@ -398,7 +411,8 @@ mod traits {
 	}
 }
 
-mod conversions {
+#[cfg(feature = "chrono")]
+mod conversions__chrono {
 	use super::*;
 	
 	//		From: Weekday -> Weekdays											
@@ -412,6 +426,11 @@ mod conversions {
 		assert_eq!(Weekdays::from(Weekday::Sat), Weekdays::new(0b00000_10));
 		assert_eq!(Weekdays::from(Weekday::Sun), Weekdays::new(0b00000_01));
 	}
+}
+
+#[cfg(feature = "postgres")]
+mod conversions__postgres {
+	use super::*;
 	
 	//		FromSql																
 	#[test]

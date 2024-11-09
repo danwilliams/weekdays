@@ -44,17 +44,23 @@ mod tests;
 
 //		Packages
 
-use bytes::BytesMut;
-use chrono::Weekday;
 use core::{
-	error::Error,
 	fmt::{Debug, Display, Formatter},
 	fmt,
 	ops::{Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Sub, SubAssign},
 };
+
+#[cfg(feature = "chrono")]
+use chrono::Weekday;
+#[cfg(feature = "postgres")]
+use ::{
+	bytes::BytesMut,
+	core::error::Error,
+	std::io::{Error as IoError, ErrorKind as IoErrorKind},
+	tokio_postgres::types::{FromSql, IsNull, ToSql, Type, to_sql_checked},
+};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::io::{Error as IoError, ErrorKind as IoErrorKind};
-use tokio_postgres::types::{FromSql, IsNull, ToSql, Type, to_sql_checked};
 
 
 
@@ -311,6 +317,7 @@ impl Weekdays {
 	/// assert_eq!(Weekdays::NONE.to_chrono_vec(), vec![]);
 	/// ```
 	/// 
+	#[cfg(feature = "chrono")]
 	#[must_use]
 	pub fn to_chrono_vec(&self) -> Vec<Weekday> {
 		[
@@ -441,6 +448,7 @@ impl Debug for Weekdays {
 }
 
 //󰭅		Deserialize																
+#[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Weekdays {
 	//		deserialize															
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -459,6 +467,7 @@ impl Display for Weekdays {
 }
 
 //󰭅		From: Weekday -> Weekdays												
+#[cfg(feature = "chrono")]
 impl From<Weekday> for Weekdays {
 	//		from																
 	fn from(day: Weekday) -> Self {
@@ -475,6 +484,7 @@ impl From<Weekday> for Weekdays {
 }
 
 //󰭅		FromSql																	
+#[cfg(feature = "postgres")]
 impl FromSql<'_> for Weekdays {
 	//		from_sql															
 	fn from_sql(ty: &Type, raw: &[u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
@@ -538,6 +548,7 @@ impl Not for Weekdays {
 }
 
 //󰭅		Serialize																
+#[cfg(feature = "serde")]
 impl Serialize for Weekdays {
 	//		serialize															
 	fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
@@ -564,6 +575,7 @@ impl SubAssign for Weekdays {
 }
 
 //󰭅		ToSql																	
+#[cfg(feature = "postgres")]
 impl ToSql for Weekdays {
 	//		to_sql																
 	fn to_sql(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn Error + Sync + Send>> {

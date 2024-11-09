@@ -19,13 +19,22 @@ strip     = true   # Automatically strip symbols from the binary
 opt-level = 3      # Maximum optimisation (this is the cargo default)
 lto       = "thin" # Enable link-time optimisation (fast)
 
+#================================[  FEATURES  ]=================================
+
+[features]
+default  = []
+full     = ["chrono", "postgres", "serde"]
+chrono   = ["dep:chrono"]
+postgres = ["dep:bytes", "dep:tokio-postgres"]
+serde    = ["dep:serde"]
+
 #==============================[  DEPENDENCIES  ]===============================
 
 [dependencies]
-bytes              = "1.7.1"
-chrono             = { version = "0.4.38" }
-tokio-postgres     = { version = "0.7.11", features = ["with-chrono-0_4"] }
-serde              = { version = "1.0.214", features = ["derive"] }
+bytes              = { optional = true, version = "1.7.1" }
+chrono             = { optional = true, version = "0.4.38" }
+tokio-postgres     = { optional = true, version = "0.7.11", features = ["with-chrono-0_4"] }
+serde              = { optional = true, version = "1.0.214", features = ["derive"] }
 
 [dev-dependencies]
 claims             = "0.7.1"
