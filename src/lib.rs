@@ -1,4 +1,7 @@
 //! The Weekdays crate provides days of the week bit-mapped in a single byte.
+//! 
+//! The main type provided is the [`Weekdays`] struct.
+//! 
 
 
 
@@ -70,8 +73,28 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 /// A bit-mapped representation of the days of the week.
 /// 
 /// This struct uses a single byte, where each bit represents a day of the week.
-/// The bits are ordered from most significant to least significant as Monday to
-/// Sunday, with the least significant bit representing Sunday.
+/// The bits are ordered from most significant to least significant, starting
+/// from Monday, with the least significant bit representing Sunday.
+/// 
+/// ```text
+/// Monday
+/// | Tuesday
+/// | | Wednesday
+/// | | | Thursday
+/// | | | | Friday
+/// | | | | | Saturday
+/// | | | | | | Sunday
+/// 1 1 1 1 1 1 1
+/// ```
+/// 
+/// # Examples
+/// 
+/// ```
+/// use weekdays::Weekdays;
+/// 
+/// let weekends = Weekdays::new(0b000_0011);
+/// assert_eq!(weekends, Weekdays::WEEKENDS);
+/// ```
 /// 
 #[derive(Clone, Copy, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Weekdays(u8);
@@ -125,6 +148,9 @@ impl Weekdays {
 	/// represents a day of the week. The bits are ordered from most significant
 	/// to least significant as Monday to Sunday, with the least significant bit
 	/// representing Sunday.
+	/// 
+	/// **IMPORTANT**: Note that if the incoming value is larger than 7 bits,
+	/// the extra bit will be silently ignored.
 	/// 
 	/// # Parameters
 	/// 
