@@ -47,7 +47,7 @@ mod tests;
 use bytes::BytesMut;
 use core::{
 	error::Error,
-	fmt::{Display, Formatter},
+	fmt::{Debug, Display, Formatter},
 	fmt,
 	ops::{Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Sub, SubAssign},
 };
@@ -65,7 +65,7 @@ use tokio_postgres::types::{FromSql, IsNull, ToSql, Type, to_sql_checked};
 /// The bits are ordered from most significant to least significant as Monday to
 /// Sunday, with the least significant bit representing Sunday.
 /// 
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Weekdays(u8);
 
 //󰭅		Weekdays																
@@ -167,6 +167,151 @@ impl Weekdays {
 	pub const fn contains(&self, day: Self) -> bool {
 		self.0 & day.0 == day.0
 	}
+	
+	//		days																
+	/// Returns the number of days set.
+	/// 
+	/// This method will count the number of bits set in the bit-mapped value,
+	/// and return the count as the number of days.
+	/// 
+	/// # Examples
+	/// 
+	/// ```
+	/// use weekdays::Weekdays;
+	/// 
+	/// let weekdays = Weekdays::WEEKDAYS;
+	/// assert_eq!(weekdays.days(), 5);
+	/// ```
+	/// 
+	#[expect(clippy::cast_possible_truncation, reason = "Value is guaranteed to be <= 7")]
+	#[must_use]
+	pub const fn days(&self) -> u8 {
+		self.0.count_ones() as u8
+	}
+	
+	//		is_empty															
+	/// Checks if the set of days is empty.
+	/// 
+	/// This method will return `true` if no days are set in the bit-mapped
+	/// value.
+	/// 
+	/// # Examples
+	/// 
+	/// ```
+	/// use weekdays::Weekdays;
+	/// 
+	/// let weekdays = Weekdays::NONE;
+	/// assert!(weekdays.is_empty());
+	/// ```
+	/// 
+	#[must_use]
+	pub const fn is_empty(&self) -> bool {
+		self.0 == 0
+	}
+	
+	//		is_weekday															
+	/// Checks if the set of days represents a weekday.
+	/// 
+	/// This method will return `true` if the set of days contains only weekdays
+	/// (Monday to Friday).
+	/// 
+	/// # Examples
+	/// 
+	/// ```
+	/// use weekdays::Weekdays;
+	/// 
+	/// let weekdays = Weekdays::THURSDAY;
+	/// assert!(weekdays.is_weekday());
+	/// ```
+	/// 
+	#[must_use]
+	pub const fn is_weekday(&self) -> bool {
+		self.0 & Self::WEEKENDS.0 == 0
+	}
+	
+	//		is_weekend															
+	/// Checks if the set of days represents a weekend.
+	/// 
+	/// This method will return `true` if the set of days contains only weekends
+	/// (Saturday and Sunday).
+	/// 
+	/// # Examples
+	/// 
+	/// ```
+	/// use weekdays::Weekdays;
+	/// 
+	/// let weekdays = Weekdays::SATURDAY;
+	/// assert!(weekdays.is_weekend());
+	/// ```
+	/// 
+	#[must_use]
+	pub const fn is_weekend(&self) -> bool {
+		self.0 & Self::WEEKDAYS.0 == 0
+	}
+	
+	//		iter																
+	/// Returns an iterator over the days of the week.
+	/// 
+	/// This method will return an iterator that will yield each day of the week
+	/// that is set in the bit-mapped value.
+	/// 
+	/// # Examples
+	/// 
+	/// ```
+	/// use weekdays::Weekdays;
+	/// 
+	/// let weekdays = Weekdays::WEEKDAYS;
+	/// let mut iter = weekdays.iter();
+	/// 
+	/// assert_eq!(iter.next(), Some(Weekdays::MONDAY));
+	/// assert_eq!(iter.next(), Some(Weekdays::TUESDAY));
+	/// assert_eq!(iter.next(), Some(Weekdays::WEDNESDAY));
+	/// assert_eq!(iter.next(), Some(Weekdays::THURSDAY));
+	/// assert_eq!(iter.next(), Some(Weekdays::FRIDAY));
+	/// assert_eq!(iter.next(), None);
+	/// ```
+	/// 
+	/// # See also
+	/// 
+	/// * [`Iterator`]
+	/// 
+	#[must_use]
+	pub const fn iter(&self) -> WeekdaysIter {
+		WeekdaysIter {
+			remaining: self.0,
+			position:  0,
+		}
+	}
+	
+	//		to_vec																
+	/// Converts the set of days to a [`Vec`] of days.
+	/// 
+	/// This method will return a [`Vec`] containing each day of the week that
+	/// is set in the bit-mapped value.
+	/// 
+	/// # Examples
+	/// 
+	/// ```
+	/// use weekdays::Weekdays;
+	/// 
+	/// let weekdays = Weekdays::WEEKDAYS;
+	/// let days     = weekdays.to_vec();
+	/// 
+	/// assert_eq!(days, vec![
+	///     Weekdays::MONDAY,
+	///     Weekdays::TUESDAY,
+	///     Weekdays::WEDNESDAY,
+	///     Weekdays::THURSDAY,
+	///     Weekdays::FRIDAY,
+	/// ]);
+	/// 
+	/// assert_eq!(Weekdays::NONE.to_vec(), vec![]);
+	/// ```
+	/// 
+	#[must_use]
+	pub fn to_vec(&self) -> Vec<Self> {
+		self.iter().collect()
+	}
 }
 
 //󰭅		Add																		
@@ -243,11 +388,19 @@ impl BitXorAssign for Weekdays {
 	}
 }
 
+//󰭅		Debug																	
+impl Debug for Weekdays {
+	//		fmt																	
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		write!(f, "Weekdays({:03b}_{:04b})", self.0 >> 4, self.0 & 0b1111)
+	}
+}
+
 //󰭅		Display																	
 impl Display for Weekdays {
 	//		fmt																	
 	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-		write!(f, "{:07b}", self.0)
+		write!(f, "{:05b}_{:02b}", self.0 >> 2, self.0 & 0b11)
 	}
 }
 
@@ -273,6 +426,34 @@ impl FromSql<'_> for Weekdays {
 	//		accepts																
 	fn accepts(ty: &Type) -> bool {
 		ty.name() == "bit"
+	}
+}
+
+//󰭅		IntoIterator															
+impl IntoIterator for Weekdays {
+	type Item     = Self;
+	type IntoIter = WeekdaysIter;
+	
+	//		into_iter															
+	fn into_iter(self) -> Self::IntoIter {
+		WeekdaysIter {
+			remaining: self.0,
+			position:  0,
+		}
+	}
+}
+
+//󰭅		IntoIterator															
+impl IntoIterator for &Weekdays {
+	type Item     = Weekdays;
+	type IntoIter = WeekdaysIter;
+	
+	//		into_iter															
+	fn into_iter(self) -> Self::IntoIter {
+		WeekdaysIter {
+			remaining: self.0,
+			position:  0,
+		}
 	}
 }
 
@@ -329,4 +510,32 @@ impl ToSql for Weekdays {
 	to_sql_checked!();
 }
 
+//		WeekdaysIter															
+/// An iterator over the days of the week.
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct WeekdaysIter {
+	/// The remaining days to iterate over.
+	remaining: u8,
+	
+	/// The current position in the iteration.
+	position:  u8,
+}
 
+//󰭅		Iterator																
+impl Iterator for WeekdaysIter {
+	type Item = Weekdays;
+	
+	//		next																
+	fn next(&mut self) -> Option<Self::Item> {
+		while self.position < 7 {
+			let current      = 0b100_0000 >> self.position;
+			#[expect(clippy::arithmetic_side_effects, reason = "This is checked by the while loop")]
+			{ self.position += 1; }
+			
+			if self.remaining & current != 0 {
+				return Some(Weekdays(current));
+			}
+		}
+		None
+	}
+}

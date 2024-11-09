@@ -43,20 +43,87 @@ mod public_methods {
 		assert!( weekdays.contains(Weekdays::new(0b01010_10)));
 		assert!(!weekdays.contains(Weekdays::new(0b01010_11)));
 	}
+	
+	//		days																
+	#[test]
+	fn days() {
+		assert_eq!(Weekdays::new(0b00000_00).days(), 0);
+		assert_eq!(Weekdays::new(0b00000_01).days(), 1);
+		assert_eq!(Weekdays::new(0b00010_00).days(), 1);
+		assert_eq!(Weekdays::new(0b10001_00).days(), 2);
+		assert_eq!(Weekdays::new(0b11111_11).days(), 7);
+	}
+	
+	//		is_empty															
+	#[test]
+	fn is_empty() {
+		assert!( Weekdays::new(0b00000_00).is_empty());
+		assert!(!Weekdays::new(0b00000_01).is_empty());
+		assert!(!Weekdays::new(0b00010_00).is_empty());
+		assert!(!Weekdays::new(0b10001_00).is_empty());
+		assert!(!Weekdays::new(0b11111_11).is_empty());
+	}
+	
+	//		is_weekday															
+	#[test]
+	fn is_weekday() {
+		assert!( Weekdays::MONDAY   .is_weekday());
+		assert!( Weekdays::TUESDAY  .is_weekday());
+		assert!( Weekdays::WEDNESDAY.is_weekday());
+		assert!( Weekdays::THURSDAY .is_weekday());
+		assert!( Weekdays::FRIDAY   .is_weekday());
+		assert!(!Weekdays::SATURDAY .is_weekday());
+		assert!(!Weekdays::SUNDAY   .is_weekday());
+		assert!( Weekdays::WEEKDAYS .is_weekday());
+		assert!(!Weekdays::WEEKENDS .is_weekday());
+	}
+	
+	//		is_weekend															
+	#[test]
+	fn is_weekend() {
+		assert!(!Weekdays::MONDAY   .is_weekend());
+		assert!(!Weekdays::TUESDAY  .is_weekend());
+		assert!(!Weekdays::WEDNESDAY.is_weekend());
+		assert!(!Weekdays::THURSDAY .is_weekend());
+		assert!(!Weekdays::FRIDAY   .is_weekend());
+		assert!( Weekdays::SATURDAY .is_weekend());
+		assert!( Weekdays::SUNDAY   .is_weekend());
+		assert!(!Weekdays::WEEKDAYS .is_weekend());
+		assert!( Weekdays::WEEKENDS .is_weekend());
+	}
+	
+	//		iter																
+	#[test]
+	fn iter() {
+		let weekdays = Weekdays::new(0b01010_10);
+		let mut iter = weekdays.iter();
+		assert_eq!(iter.next(), Some(Weekdays::TUESDAY));
+		assert_eq!(iter.next(), Some(Weekdays::THURSDAY));
+		assert_eq!(iter.next(), Some(Weekdays::SATURDAY));
+		assert_eq!(iter.next(), None);
+	}
+	
+	//		to_vec																
+	#[test]
+	fn to_vec() {
+		assert_eq!(Weekdays::new(0b00000_00).to_vec(), vec![]);
+		assert_eq!(Weekdays::new(0b00000_01).to_vec(), vec![Weekdays::SUNDAY]);
+		assert_eq!(Weekdays::new(0b00010_00).to_vec(), vec![Weekdays::THURSDAY]);
+		assert_eq!(Weekdays::new(0b10001_00).to_vec(), vec![Weekdays::MONDAY, Weekdays::FRIDAY]);
+		assert_eq!(Weekdays::new(0b11111_11).to_vec(), vec![
+			Weekdays::MONDAY,
+			Weekdays::TUESDAY,
+			Weekdays::WEDNESDAY,
+			Weekdays::THURSDAY,
+			Weekdays::FRIDAY,
+			Weekdays::SATURDAY,
+			Weekdays::SUNDAY,
+		]);
+	}
 }
 
 mod derived_traits {
 	use super::*;
-	
-	//		Debug																
-	#[test]
-	fn debug() {
-		assert_eq!(format!("{:?}", Weekdays::new(0b00000_00)), "Weekdays(0)");
-		assert_eq!(format!("{:?}", Weekdays::new(0b00000_01)), "Weekdays(1)");
-		assert_eq!(format!("{:?}", Weekdays::new(0b00010_00)), "Weekdays(8)");
-		assert_eq!(format!("{:?}", Weekdays::new(0b10000_00)), "Weekdays(64)");
-		assert_eq!(format!("{:?}", Weekdays::new(0b11111_11)), "Weekdays(127)");
-	}
 	
 	//		Eq																	
 	#[test]
@@ -217,14 +284,35 @@ mod traits {
 		assert_eq!(weekdays5, Weekdays::new(0b00000_11));
 	}
 	
+	//		Debug																
+	#[test]
+	fn debug() {
+		assert_eq!(format!("{:?}", Weekdays::new(0b00000_00)), "Weekdays(000_0000)");
+		assert_eq!(format!("{:?}", Weekdays::new(0b00000_01)), "Weekdays(000_0001)");
+		assert_eq!(format!("{:?}", Weekdays::new(0b00010_00)), "Weekdays(000_1000)");
+		assert_eq!(format!("{:?}", Weekdays::new(0b10000_00)), "Weekdays(100_0000)");
+		assert_eq!(format!("{:?}", Weekdays::new(0b11111_11)), "Weekdays(111_1111)");
+	}
+	
 	//		Display																
 	#[test]
 	fn display() {
-		assert_eq!(format!("{}", Weekdays::new(0b00000_00)), "0000000");
-		assert_eq!(format!("{}", Weekdays::new(0b00000_01)), "0000001");
-		assert_eq!(format!("{}", Weekdays::new(0b00010_00)), "0001000");
-		assert_eq!(format!("{}", Weekdays::new(0b10000_00)), "1000000");
-		assert_eq!(format!("{}", Weekdays::new(0b11111_11)), "1111111");
+		assert_eq!(format!("{}", Weekdays::new(0b00000_00)), "00000_00");
+		assert_eq!(format!("{}", Weekdays::new(0b00000_01)), "00000_01");
+		assert_eq!(format!("{}", Weekdays::new(0b00010_00)), "00010_00");
+		assert_eq!(format!("{}", Weekdays::new(0b10000_00)), "10000_00");
+		assert_eq!(format!("{}", Weekdays::new(0b11111_11)), "11111_11");
+	}
+	
+	//		IntoIterator														
+	#[test]
+	fn into_iterator() {
+		let weekdays = Weekdays::new(0b01010_10);
+		let mut iter = weekdays.into_iter();
+		assert_eq!(iter.next(), Some(Weekdays::TUESDAY));
+		assert_eq!(iter.next(), Some(Weekdays::THURSDAY));
+		assert_eq!(iter.next(), Some(Weekdays::SATURDAY));
+		assert_eq!(iter.next(), None);
 	}
 	
 	//		Not																	
