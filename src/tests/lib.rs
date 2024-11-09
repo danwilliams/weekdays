@@ -3,7 +3,7 @@
 //		Packages
 
 use super::*;
-use claims::assert_err;
+use claims::{assert_err, assert_ok_eq};
 
 
 
@@ -101,6 +101,24 @@ mod public_methods {
 		assert_eq!(iter.next(), Some(Weekdays::THURSDAY));
 		assert_eq!(iter.next(), Some(Weekdays::SATURDAY));
 		assert_eq!(iter.next(), None);
+	}
+	
+	//		to_chrono_vec														
+	#[test]
+	fn to_chrono_vec() {
+		assert_eq!(Weekdays::new(0b00000_00).to_chrono_vec(), vec![]);
+		assert_eq!(Weekdays::new(0b00000_01).to_chrono_vec(), vec![Weekday::Sun]);
+		assert_eq!(Weekdays::new(0b00010_00).to_chrono_vec(), vec![Weekday::Thu]);
+		assert_eq!(Weekdays::new(0b10001_00).to_chrono_vec(), vec![Weekday::Mon, Weekday::Fri]);
+		assert_eq!(Weekdays::new(0b11111_11).to_chrono_vec(), vec![
+			Weekday::Mon,
+			Weekday::Tue,
+			Weekday::Wed,
+			Weekday::Thu,
+			Weekday::Fri,
+			Weekday::Sat,
+			Weekday::Sun,
+		]);
 	}
 	
 	//		to_vec																
@@ -294,6 +312,16 @@ mod traits {
 		assert_eq!(format!("{:?}", Weekdays::new(0b11111_11)), "Weekdays(111_1111)");
 	}
 	
+	//		Deserialize															
+	#[test]
+	fn deserialize() {
+		assert_ok_eq!(serde_json::from_str::<Weekdays>(  "0"), Weekdays::new(0b00000_00));
+		assert_ok_eq!(serde_json::from_str::<Weekdays>(  "1"), Weekdays::new(0b00000_01));
+		assert_ok_eq!(serde_json::from_str::<Weekdays>(  "8"), Weekdays::new(0b00010_00));
+		assert_ok_eq!(serde_json::from_str::<Weekdays>( "64"), Weekdays::new(0b10000_00));
+		assert_ok_eq!(serde_json::from_str::<Weekdays>("127"), Weekdays::new(0b11111_11));
+	}
+	
 	//		Display																
 	#[test]
 	fn display() {
@@ -323,6 +351,16 @@ mod traits {
 		assert_eq!(!Weekdays::new(0b00010_00), Weekdays::new(0b11101_11));
 		assert_eq!(!Weekdays::new(0b10000_00), Weekdays::new(0b01111_11));
 		assert_eq!(!Weekdays::new(0b11111_11), Weekdays::new(0b00000_00));
+	}
+	
+	//		Serialize															
+	#[test]
+	fn serialize() {
+		assert_eq!(serde_json::to_string(&Weekdays::new(0b00000_00)).unwrap(),   "0");
+		assert_eq!(serde_json::to_string(&Weekdays::new(0b00000_01)).unwrap(),   "1");
+		assert_eq!(serde_json::to_string(&Weekdays::new(0b00010_00)).unwrap(),   "8");
+		assert_eq!(serde_json::to_string(&Weekdays::new(0b10000_00)).unwrap(),  "64");
+		assert_eq!(serde_json::to_string(&Weekdays::new(0b11111_11)).unwrap(), "127");
 	}
 	
 	//		SubAssign															
@@ -362,6 +400,18 @@ mod traits {
 
 mod conversions {
 	use super::*;
+	
+	//		From: Weekday -> Weekdays											
+	#[test]
+	fn from_weekday() {
+		assert_eq!(Weekdays::from(Weekday::Mon), Weekdays::new(0b10000_00));
+		assert_eq!(Weekdays::from(Weekday::Tue), Weekdays::new(0b01000_00));
+		assert_eq!(Weekdays::from(Weekday::Wed), Weekdays::new(0b00100_00));
+		assert_eq!(Weekdays::from(Weekday::Thu), Weekdays::new(0b00010_00));
+		assert_eq!(Weekdays::from(Weekday::Fri), Weekdays::new(0b00001_00));
+		assert_eq!(Weekdays::from(Weekday::Sat), Weekdays::new(0b00000_10));
+		assert_eq!(Weekdays::from(Weekday::Sun), Weekdays::new(0b00000_01));
+	}
 	
 	//		FromSql																
 	#[test]

@@ -45,12 +45,14 @@ mod tests;
 //		Packages
 
 use bytes::BytesMut;
+use chrono::Weekday;
 use core::{
 	error::Error,
 	fmt::{Debug, Display, Formatter},
 	fmt,
 	ops::{Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Sub, SubAssign},
 };
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::io::{Error as IoError, ErrorKind as IoErrorKind};
 use tokio_postgres::types::{FromSql, IsNull, ToSql, Type, to_sql_checked};
 
@@ -283,6 +285,48 @@ impl Weekdays {
 		}
 	}
 	
+	//		to_chrono_vec														
+	/// Converts the set of days to a [`Vec`] of Chrono [`Weekday`]s.
+	/// 
+	/// This method will return a [`Vec`] containing each day of the week that
+	/// is set in the bit-mapped value, converted to a Chrono [`Weekday`].
+	/// 
+	/// # Examples
+	/// 
+	/// ```
+	/// use chrono::Weekday;
+	/// use weekdays::Weekdays;
+	///
+	/// let weekdays = Weekdays::WEEKDAYS;
+	/// let days     = weekdays.to_chrono_vec();
+	///
+	/// assert_eq!(days, vec![
+	///     Weekday::Mon,
+	///     Weekday::Tue,
+	///     Weekday::Wed,
+	///     Weekday::Thu,
+	///     Weekday::Fri,
+	/// ]);
+	///
+	/// assert_eq!(Weekdays::NONE.to_chrono_vec(), vec![]);
+	/// ```
+	/// 
+	#[must_use]
+	pub fn to_chrono_vec(&self) -> Vec<Weekday> {
+		[
+			Weekday::Mon,
+			Weekday::Tue,
+			Weekday::Wed,
+			Weekday::Thu,
+			Weekday::Fri,
+			Weekday::Sat,
+			Weekday::Sun,
+		]
+			.into_iter()
+			.filter(|&day| self.contains(Self::from(day)))
+			.collect()
+	}
+	
 	//		to_vec																
 	/// Converts the set of days to a [`Vec`] of days.
 	/// 
@@ -396,11 +440,37 @@ impl Debug for Weekdays {
 	}
 }
 
+//󰭅		Deserialize																
+impl<'de> Deserialize<'de> for Weekdays {
+	//		deserialize															
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+		where D: Deserializer<'de>,
+	{
+		u8::deserialize(deserializer).map(Self::new)
+	}
+}
+
 //󰭅		Display																	
 impl Display for Weekdays {
 	//		fmt																	
 	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
 		write!(f, "{:05b}_{:02b}", self.0 >> 2, self.0 & 0b11)
+	}
+}
+
+//󰭅		From: Weekday -> Weekdays												
+impl From<Weekday> for Weekdays {
+	//		from																
+	fn from(day: Weekday) -> Self {
+		match day {
+			Weekday::Mon => Self::MONDAY,
+			Weekday::Tue => Self::TUESDAY,
+			Weekday::Wed => Self::WEDNESDAY,
+			Weekday::Thu => Self::THURSDAY,
+			Weekday::Fri => Self::FRIDAY,
+			Weekday::Sat => Self::SATURDAY,
+			Weekday::Sun => Self::SUNDAY,
+		}
 	}
 }
 
@@ -464,6 +534,14 @@ impl Not for Weekdays {
 	//		not																	
 	fn not(self) -> Self::Output {
 		Self(!self.0 & Self::ALL_DAYS_MASK)
+	}
+}
+
+//󰭅		Serialize																
+impl Serialize for Weekdays {
+	//		serialize															
+	fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+		serializer.serialize_u8(self.0)
 	}
 }
 
