@@ -34,6 +34,14 @@
 
 
 
+//		Modules
+
+#[cfg(test)]
+#[path = "tests/lib.rs"]
+mod tests;
+
+
+
 //		Packages
 
 use bytes::BytesMut;

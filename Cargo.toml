@@ -25,6 +25,9 @@ lto       = "thin" # Enable link-time optimisation (fast)
 bytes              = "1.7.1"
 tokio-postgres     = { version = "0.7.11", features = ["with-chrono-0_4"] }
 
+[dev-dependencies]
+claims             = "0.7.1"
+
 #=================================[  LINTS  ]===================================
 
 #	For an explanation of the following configuration, see:
