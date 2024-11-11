@@ -1,5 +1,11 @@
 # Weekdays
 
+![Rust](https://img.shields.io/badge/Rust-1.81%2B-b7410e?style=flat&logo=rust&logoColor=white&labelColor=b7410e)
+[![Crate version](https://img.shields.io/crates/v/weekdays?style=flat)](https://crates.io/crates/weekdays)
+[![CI](https://img.shields.io/github/actions/workflow/status/danwilliams/weekdays/ci.yml?style=flat&logo=github&logoColor=white&label=build%2Ftest)](https://github.com/danwilliams/weekdays/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/docsrs/weekdays?style=flat&logo=docs.rs&logoColor=white)](https://docs.rs/crate/weekdays/latest)
+![License](https://img.shields.io/github/license/danwilliams/weekdays?style=flat)
+
 The Weekdays crate provides a simple [`Weekdays`](https://docs.rs/weekdays/latest/weekdays/struct.Weekdays.html)
 type for representing days of the week bit-mapped in a single byte, and
 functionality for working with them.
