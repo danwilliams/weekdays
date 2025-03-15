@@ -74,18 +74,18 @@ mod public_methods {
 		assert!(!Weekdays::new(0b11111_11).is_empty());
 	}
 	
-	//		is_weekday															
+	//		is_workday															
 	#[test]
-	fn is_weekday() {
-		assert!( Weekdays::MONDAY   .is_weekday());
-		assert!( Weekdays::TUESDAY  .is_weekday());
-		assert!( Weekdays::WEDNESDAY.is_weekday());
-		assert!( Weekdays::THURSDAY .is_weekday());
-		assert!( Weekdays::FRIDAY   .is_weekday());
-		assert!(!Weekdays::SATURDAY .is_weekday());
-		assert!(!Weekdays::SUNDAY   .is_weekday());
-		assert!( Weekdays::WEEKDAYS .is_weekday());
-		assert!(!Weekdays::WEEKENDS .is_weekday());
+	fn is_workday() {
+		assert!( Weekdays::MONDAY   .is_workday());
+		assert!( Weekdays::TUESDAY  .is_workday());
+		assert!( Weekdays::WEDNESDAY.is_workday());
+		assert!( Weekdays::THURSDAY .is_workday());
+		assert!( Weekdays::FRIDAY   .is_workday());
+		assert!(!Weekdays::SATURDAY .is_workday());
+		assert!(!Weekdays::SUNDAY   .is_workday());
+		assert!( Weekdays::WEEKDAYS .is_workday());
+		assert!(!Weekdays::WEEKENDS .is_workday());
 	}
 	
 	//		is_weekend															

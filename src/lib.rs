@@ -259,7 +259,28 @@ impl Weekdays {
 	/// ```
 	/// 
 	#[must_use]
+	#[deprecated = "Use is_workday instead"]
 	pub const fn is_weekday(&self) -> bool {
+		self.is_workday()
+	}
+
+	//		is_workday															
+	/// Checks if the set of days represents a workday.
+	/// 
+	/// This method will return `true` if the set of days contains only workdays
+	/// (Monday to Friday).
+	/// 
+	/// # Examples
+	/// 
+	/// ```
+	/// use weekdays::Weekdays;
+	/// 
+	/// let workdays = Weekdays::THURSDAY;
+	/// assert!(workdays.is_workday());
+	/// ```
+	/// 
+	#[must_use]
+	pub const fn is_workday(&self) -> bool {
 		self.0 & Self::WEEKENDS.0 == 0
 	}
 	
