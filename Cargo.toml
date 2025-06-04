@@ -31,14 +31,14 @@ serde    = ["dep:serde"]
 #==============================[  DEPENDENCIES  ]===============================
 
 [dependencies]
-bytes              = { optional = true, version = "1.7.1" }
-chrono             = { optional = true, version = "0.4.38" }
-tokio-postgres     = { optional = true, version = "0.7.11", features = ["with-chrono-0_4"] }
-serde              = { optional = true, version = "1.0.214", features = ["derive"] }
+bytes              = { optional = true, version = "1.10.1" }
+chrono             = { optional = true, version = "0.4.41" }
+tokio-postgres     = { optional = true, version = "0.7.13", features = ["with-chrono-0_4"] }
+serde              = { optional = true, version = "1.0.219", features = ["derive"] }
 
 [dev-dependencies]
-claims             = "0.7.1"
-serde_json         = { version = "1.0.128", features = ["preserve_order"] }
+claims             = "0.8.0"
+serde_json         = { version = "1.0.140", features = ["preserve_order"] }
 
 #=================================[  LINTS  ]===================================
 
