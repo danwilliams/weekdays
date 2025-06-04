@@ -5,7 +5,7 @@
 
 
 
-//		Global configuration
+//		Global configuration																							
 
 //	Customisations of the standard linting configuration
 #![allow(clippy::items_after_test_module, reason = "Not needed with separated tests")]
@@ -37,7 +37,7 @@
 
 
 
-//		Modules
+//		Modules																											
 
 #[cfg(test)]
 #[path = "tests/lib.rs"]
@@ -45,7 +45,7 @@ mod tests;
 
 
 
-//		Packages
+//		Packages																										
 
 use core::{
 	fmt::{Debug, Display, Formatter},
@@ -67,7 +67,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 
 
-//		Structs
+//		Structs																											
 
 //		Weekdays																
 /// A bit-mapped representation of the days of the week.
